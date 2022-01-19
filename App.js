@@ -1,18 +1,82 @@
 import React, { useEffect, useState} from 'react';
-import { Text, View, FlatList,Image, StyleSheet  } from 'react-native';
+import { Text, View, FlatList,Image, StyleSheet, ScrollView,TextInput, Button } from 'react-native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { NavigationContainer } from '@react-navigation/native';
 
 const styles = StyleSheet.create({
   textos: {
-    backgroundColor: "white",
     textAlign: "center",
     padding: 10,
     paddingLeft:15,
     paddingRight:15
-  }
+  },
+  textinput: {
+    height: 40,
+    width: 225,
+    borderColor: 'black',
+    borderWidth: 1,
+    marginBottom: 20,
+    marginTop:20
+    }
 })
-                                                                              
-export default function fruitScreen({ route }) {
+
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+function HomeStack() {
+  return (
+    <Tab.Navigator
+      tabBarOptions={{
+        activeBackgroundColor: '#A1F45D',
+        inactiveBackgroundColor: '#CFF0B4',
+      }}
+
+      screenOptions={{ headerTitleAlign: 'center' }}>
+      <Tab.Screen
+        name="Fruteria Paco"
+        component={fruitScreen}
+        options={{ headerStyle: { backgroundColor: '#A1F45D' } }}
+      />
+      <Tab.Screen
+        name="Añadir Fruta"
+        component={addScreen}
+        options={{ headerStyle: { backgroundColor: '#A1F45D' } }}
+      />
+    </Tab.Navigator>
+
+  );
+
+}
+
+function addStack() {
+  return (
+    <Tab.Navigator
+      tabBarOptions={{
+        activeBackgroundColor: '#28FF06',
+        inactiveBackgroundColor: '#91EF83',
+      }}
+
+      screenOptions={{ headerTitleAlign: 'center' }}>
+      <Tab.Screen
+        name="Principal"
+        component={fruitScreen}
+        options={{ headerStyle: { backgroundColor: '#28FF06' } }}
+      />
+      <Tab.Screen
+        name="Secundaria"
+        component={addScreen}
+        options={{ headerStyle: { backgroundColor: '#28FF06' } }}
+      />
+    </Tab.Navigator>
+
+  );
+
+}
+
+function fruitScreen({ route }) {
   const [fruits, setFruits] = useState(null);
+  
     
     useEffect(() => {
       fetch("http://10.0.2.2:8080/fruits")
@@ -30,6 +94,8 @@ export default function fruitScreen({ route }) {
 
     const renderItem = ( {item} ) => (
     console.log("--entra en el render", item),
+
+    <ScrollView>
     <View>
       <View style={{alignItems:'center'}}>
         {item.name === "pineapple" ?
@@ -60,9 +126,20 @@ export default function fruitScreen({ route }) {
           
         <View><Text style={styles.textos}>{item.name}</Text></View>
         <View><Text style={styles.textos}>El precio es: {item.price}</Text></View>
+        <View
+                  style={{
+                  borderBottomColor: 'blue',
+                  borderBottomWidth: 1,
+                  padding:10
+                  }}
+                />
+        
+             
     
       
   </View>
+  </ScrollView>
+
     );
 
     return(
@@ -78,3 +155,78 @@ export default function fruitScreen({ route }) {
   );
 
   }
+
+function addScreen() {
+
+    const [fruit, setFruits] = React.useState('');
+    const [price, setPrice] = React.useState(null);
+    
+
+
+    const onPress = () => {
+      fetch("http://10.0.2.2:8080/fruits",{
+        method: 'POST',
+        headers:{
+          Accept: 'application/json',
+          'Content-Type':'application/json',
+        },
+        body: JSON.stringify({
+          "name":setFruits,
+          "price":setPrice
+          
+        })
+      })
+    }
+  
+    return (
+  
+      <View style={{alignItems:'center'}}>
+  
+        <Text style={styles.textos}>¿Qué fruta quieres añadir?</Text>
+  
+        <TextInput
+          placeholder="Escribe el la fruta a añadir"
+          onChangeText={(x) => setFruits(x)}
+          keyboardType="default"
+          style={styles.textinput}/>
+           <TextInput
+          placeholder="Escribe el precio de la fruta a añadir"
+          onChangeText={(y) => setPrice(y)}
+          keyboardType="numeric"
+          style={styles.textinput}/>
+
+          <Button
+          title="Buscar"
+          color="#0015FF"
+          onPress={onPress}
+
+/>
+
+
+      </View>
+  
+    );
+  
+  }
+
+
+
+  export default function App() {
+
+
+    return (
+  
+      <NavigationContainer>
+  
+        <Stack.Navigator>
+  
+          <Stack.Screen name="Fruteria Paco" component={HomeStack} options={{ headerShown: false }}/>
+          <Stack.Screen name="Añadir" component={addStack} options={{ headerShown: false }}/>
+        </Stack.Navigator>
+      </NavigationContainer>
+  
+    );
+  
+  }
+
+ 
